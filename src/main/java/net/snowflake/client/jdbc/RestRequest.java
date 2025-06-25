@@ -61,11 +61,11 @@ public class RestRequest {
   private static final String SF_REQUEST_GUID = "request_guid";
 
   // min backoff in milli before we retry due to transient issues
-  private static final long minBackoffInMilli = 1000;
+  private static final long minBackoffInMilli = 200;
 
   // max backoff in milli before we retry due to transient issues
   // we double the backoff after each retry till we reach the max backoff
-  private static final long maxBackoffInMilli = 16000;
+  private static final long maxBackoffInMilli = 1000;
 
   // retry at least once even if timeout limit has been reached
   private static final int MIN_RETRY_COUNT = 1;
@@ -305,6 +305,9 @@ public class RestRequest {
         .getHttpResponse();
   }
 
+  //max min change 1s 200ms
+  //change to constant 
+  //3 runs each
   static long getNewBackoffInMilli(
       long previousBackoffInMilli,
       boolean isLoginRequest,
