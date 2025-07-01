@@ -317,19 +317,19 @@ public class RestRequest {
       int retryCount,
       long retryTimeoutInMilliseconds,
       long elapsedMilliForTransientIssues) {
-    // long backoffInMilli;
-    // if (isLoginRequest) {
-    //   long jitteredBackoffInMilli =
-    //       decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
-    //   backoffInMilli =
-    //       (long)
-    //           decorrelatedJitterBackoff.chooseRandom(
-    //               jitteredBackoffInMilli + previousBackoffInMilli,
-    //               Math.pow(2, retryCount) + jitteredBackoffInMilli);
-    // } else {
+    long backoffInMilli;
+    if (isLoginRequest) {
+      long jitteredBackoffInMilli =
+          decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
+      backoffInMilli =
+          (long)
+              decorrelatedJitterBackoff.chooseRandom(
+                  jitteredBackoffInMilli + previousBackoffInMilli,
+                  Math.pow(2, retryCount) + jitteredBackoffInMilli);
+    } else {
 
-    //   backoffInMilli = decorrelatedJitterBackoff.nextSleepTime(previousBackoffInMilli);
-    // }
+      backoffInMilli = decorrelatedJitterBackoff.nextSleepTime(previousBackoffInMilli);
+    }
 
     // backoffInMilli = Math.min(maxBackoffInMilli, Math.max(previousBackoffInMilli, backoffInMilli));
 
