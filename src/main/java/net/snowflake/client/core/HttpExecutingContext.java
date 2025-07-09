@@ -7,11 +7,11 @@ import net.snowflake.client.util.DecorrelatedJitterBackoff;
 public class HttpExecutingContext {
 
   // min backoff in milli before we retry due to transient issues
-  private static final long minBackoffMillis = 1000;
+  private static final long minBackoffMillis = 200;
 
   // max backoff in milli before we retry due to transient issues
   // we double the backoff after each retry till we reach the max backoff
-  private static final long maxBackoffMillis = 16000;
+  private static final long maxBackoffMillis = 200;
 
   // retry at least once even if timeout limit has been reached
   private static final int MIN_RETRY_COUNT = 1;

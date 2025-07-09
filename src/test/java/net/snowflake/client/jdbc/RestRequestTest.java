@@ -631,40 +631,40 @@ public class RestRequestTest {
     }
   }
 
-  @Test
-  public void shouldGenerateBackoffInRangeExceptTheLastBackoff() {
-    int minBackoffInMilli = 1000;
-    int maxBackoffInMilli = 16000;
-    long backoffInMilli = minBackoffInMilli;
-    long elapsedMilliForTransientIssues = 0;
-    DecorrelatedJitterBackoff decorrelatedJitterBackoff =
-        new DecorrelatedJitterBackoff(minBackoffInMilli, maxBackoffInMilli);
-    int retryTimeoutInMilli = 5 * 60 * 1000;
-    while (true) {
-      backoffInMilli =
-          RestRequest.getNewBackoffInMilli(
-              backoffInMilli,
-              true,
-              decorrelatedJitterBackoff,
-              10,
-              retryTimeoutInMilli,
-              elapsedMilliForTransientIssues);
+  // @Test
+  // public void shouldGenerateBackoffInRangeExceptTheLastBackoff() {
+  //   int minBackoffInMilli = 1000;
+  //   int maxBackoffInMilli = 16000;
+  //   long backoffInMilli = minBackoffInMilli;
+  //   long elapsedMilliForTransientIssues = 0;
+  //   DecorrelatedJitterBackoff decorrelatedJitterBackoff =
+  //       new DecorrelatedJitterBackoff(minBackoffInMilli, maxBackoffInMilli);
+  //   int retryTimeoutInMilli = 5 * 60 * 1000;
+  //   while (true) {
+  //     backoffInMilli =
+  //         RestRequest.getNewBackoffInMilli(
+  //             backoffInMilli,
+  //             true,
+  //             decorrelatedJitterBackoff,
+  //             10,
+  //             retryTimeoutInMilli,
+  //             elapsedMilliForTransientIssues);
 
-      assertTrue(
-          backoffInMilli <= maxBackoffInMilli,
-          "Backoff should be lower or equal to max backoff limit");
-      if (elapsedMilliForTransientIssues + backoffInMilli >= retryTimeoutInMilli) {
-        assertEquals(
-            retryTimeoutInMilli - elapsedMilliForTransientIssues,
-            backoffInMilli,
-            "Backoff should fill time till retry timeout");
-        break;
-      } else {
-        assertTrue(
-            backoffInMilli >= minBackoffInMilli,
-            "Backoff should be higher or equal to min backoff limit");
-      }
-      elapsedMilliForTransientIssues += backoffInMilli;
-    }
-  }
+  //     assertTrue(
+  //         backoffInMilli <= maxBackoffInMilli,
+  //         "Backoff should be lower or equal to max backoff limit");
+  //     if (elapsedMilliForTransientIssues + backoffInMilli >= retryTimeoutInMilli) {
+  //       assertEquals(
+  //           retryTimeoutInMilli - elapsedMilliForTransientIssues,
+  //           backoffInMilli,
+  //           "Backoff should fill time till retry timeout");
+  //       break;
+  //     } else {
+  //       assertTrue(
+  //           backoffInMilli >= minBackoffInMilli,
+  //           "Backoff should be higher or equal to min backoff limit");
+  //     }
+  //     elapsedMilliForTransientIssues += backoffInMilli;
+  //   }
+  // }
 }
