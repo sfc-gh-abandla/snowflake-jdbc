@@ -317,52 +317,52 @@ public class RestRequest {
       int retryCount,
       long retryTimeoutInMilliseconds,
       long elapsedMilliForTransientIssues) {
-    long backoffInMilli;
-    if (isLoginRequest) {
-      long jitteredBackoffInMilli =
-          decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
-      backoffInMilli =
-          (long)
-              decorrelatedJitterBackoff.chooseRandom(
-                  jitteredBackoffInMilli + previousBackoffInMilli,
-                  Math.pow(2, retryCount) + jitteredBackoffInMilli);
-    } else {
+    // long backoffInMilli;
+    // if (isLoginRequest) {
+    //   long jitteredBackoffInMilli =
+    //       decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
+    //   backoffInMilli =
+    //       (long)
+    //           decorrelatedJitterBackoff.chooseRandom(
+    //               jitteredBackoffInMilli + previousBackoffInMilli,
+    //               Math.pow(2, retryCount) + jitteredBackoffInMilli);
+    // } else {
 
-      backoffInMilli = decorrelatedJitterBackoff.nextSleepTime(previousBackoffInMilli);
-    }
+    //   backoffInMilli = decorrelatedJitterBackoff.nextSleepTime(previousBackoffInMilli);
+    // }
 
-    backoffInMilli = Math.min(maxBackoffInMilli, Math.max(previousBackoffInMilli, backoffInMilli));
+    // backoffInMilli = Math.min(maxBackoffInMilli, Math.max(previousBackoffInMilli, backoffInMilli));
 
-    if (retryTimeoutInMilliseconds > 0
-        && (elapsedMilliForTransientIssues + backoffInMilli) > retryTimeoutInMilliseconds) {
-      // If the timeout will be reached before the next backoff, just use the remaining
-      // time (but cannot be negative) - this is the only place when backoff is not in range
-      // min-max.
-      backoffInMilli =
-          Math.max(
-              0,
-              Math.min(
-                  backoffInMilli, retryTimeoutInMilliseconds - elapsedMilliForTransientIssues));
-      logger.debug(
-          "We are approaching retry timeout {}ms, setting backoff to {}ms",
-          retryTimeoutInMilliseconds,
-          backoffInMilli);
-    }
-    return backoffInMilli;
+    // if (retryTimeoutInMilliseconds > 0
+    //     && (elapsedMilliForTransientIssues + backoffInMilli) > retryTimeoutInMilliseconds) {
+    //   // If the timeout will be reached before the next backoff, just use the remaining
+    //   // time (but cannot be negative) - this is the only place when backoff is not in range
+    //   // min-max.
+    //   backoffInMilli =
+    //       Math.max(
+    //           0,
+    //           Math.min(
+    //               backoffInMilli, retryTimeoutInMilliseconds - elapsedMilliForTransientIssues));
+    //   logger.debug(
+    //       "We are approaching retry timeout {}ms, setting backoff to {}ms",
+    //       retryTimeoutInMilliseconds,
+    //       backoffInMilli);
+    // }
+    return 200l;
   }
 
-  // static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
-  //   return (response != null)
-  //       && (response.getStatusLine().getStatusCode() < 500
-  //           || // service unavailable
-  //           response.getStatusLine().getStatusCode() >= 600)
-  //       && // gateway timeout
-  //       response.getStatusLine().getStatusCode() != 408
-  //       && // retry
-  //       response.getStatusLine().getStatusCode() != 429
-  //       && // request timeout
-  //       (!retryHTTP403 || response.getStatusLine().getStatusCode() != 403);
-  // }
+  static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
+    return (response != null)
+        && (response.getStatusLine().getStatusCode() < 500
+            || // service unavailable
+            response.getStatusLine().getStatusCode() >= 600)
+        && // gateway timeout
+        response.getStatusLine().getStatusCode() != 408
+        && // retry
+        response.getStatusLine().getStatusCode() != 429
+        && // request timeout
+        (!retryHTTP403 || response.getStatusLine().getStatusCode() != 403);
+  }
 
   // static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
   //   if (response == null) {
@@ -396,31 +396,31 @@ public class RestRequest {
   //   return true;
   // }
 
-  static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
-    if (response == null) {
-      return false;  // Still retry on null responses (network issues)
-    }
+  // static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
+  //   if (response == null) {
+  //     return false;  // Still retry on null responses (network issues)
+  //   }
     
-    int statusCode = response.getStatusLine().getStatusCode();
+  //   int statusCode = response.getStatusLine().getStatusCode();
     
-    // For your experiment: FAIL FAST on 429 and 5xx (opposite of original)
-    if (statusCode == 429 || (statusCode >= 500 && statusCode < 600)) {
-      return true;  // Don't retry - fail immediately
-    }
+  //   // For your experiment: FAIL FAST on 429 and 5xx (opposite of original)
+  //   if (statusCode == 429 || (statusCode >= 500 && statusCode < 600)) {
+  //     return true;  // Don't retry - fail immediately
+  //   }
     
-    // Still retry on 408 (Request Timeout)
-    if (statusCode == 408) {
-      return false;
-    }
+  //   // Still retry on 408 (Request Timeout)
+  //   if (statusCode == 408) {
+  //     return false;
+  //   }
     
-    // Still honor the 403 retry flag
-    if (statusCode == 403 && retryHTTP403) {
-      return false;
-    }
+  //   // Still honor the 403 retry flag
+  //   if (statusCode == 403 && retryHTTP403) {
+  //     return false;
+  //   }
     
-    // Everything else is non-retryable (1xx, 2xx, 3xx, 4xx except above) like a 200 ok code shouldnt be retried
-    return true;
-  }
+  //   // Everything else is non-retryable (1xx, 2xx, 3xx, 4xx except above) like a 200 ok code shouldnt be retried
+  //   return true;
+  // }
 
   private static boolean isCertificateRevoked(Exception ex) {
     if (ex == null) {
