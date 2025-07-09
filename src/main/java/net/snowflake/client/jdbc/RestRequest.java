@@ -316,7 +316,7 @@ public class RestRequest {
       int retryCount,
       long retryTimeoutInMilliseconds,
       long elapsedMilliForTransientIssues) {
-    long backoffInMilli=200;
+    long backoffInMilli=500;
     // if (isLoginRequest) {
     //   long jitteredBackoffInMilli =
     //       decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
