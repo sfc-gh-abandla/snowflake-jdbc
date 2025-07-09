@@ -306,6 +306,7 @@ public class RestRequest {
         .getHttpResponse();
   }
 
+  
   //max min change 1s 200ms
   //change to constant 
   //3 runs each
@@ -316,38 +317,38 @@ public class RestRequest {
       int retryCount,
       long retryTimeoutInMilliseconds,
       long elapsedMilliForTransientIssues) {
-    long backoffInMilli;
-    if (isLoginRequest) {
-      long jitteredBackoffInMilli =
-          decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
-      backoffInMilli =
-          (long)
-              decorrelatedJitterBackoff.chooseRandom(
-                  jitteredBackoffInMilli + previousBackoffInMilli,
-                  Math.pow(2, retryCount) + jitteredBackoffInMilli);
-    } else {
+    // long backoffInMilli;
+    // if (isLoginRequest) {
+    //   long jitteredBackoffInMilli =
+    //       decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
+    //   backoffInMilli =
+    //       (long)
+    //           decorrelatedJitterBackoff.chooseRandom(
+    //               jitteredBackoffInMilli + previousBackoffInMilli,
+    //               Math.pow(2, retryCount) + jitteredBackoffInMilli);
+    // } else {
 
-      backoffInMilli = decorrelatedJitterBackoff.nextSleepTime(previousBackoffInMilli);
-    }
+    //   backoffInMilli = decorrelatedJitterBackoff.nextSleepTime(previousBackoffInMilli);
+    // }
 
-    backoffInMilli = Math.min(maxBackoffInMilli, Math.max(previousBackoffInMilli, backoffInMilli));
+    // backoffInMilli = Math.min(maxBackoffInMilli, Math.max(previousBackoffInMilli, backoffInMilli));
 
-    if (retryTimeoutInMilliseconds > 0
-        && (elapsedMilliForTransientIssues + backoffInMilli) > retryTimeoutInMilliseconds) {
-      // If the timeout will be reached before the next backoff, just use the remaining
-      // time (but cannot be negative) - this is the only place when backoff is not in range
-      // min-max.
-      backoffInMilli =
-          Math.max(
-              0,
-              Math.min(
-                  backoffInMilli, retryTimeoutInMilliseconds - elapsedMilliForTransientIssues));
-      logger.debug(
-          "We are approaching retry timeout {}ms, setting backoff to {}ms",
-          retryTimeoutInMilliseconds,
-          backoffInMilli);
-    }
-    return backoffInMilli;
+    // if (retryTimeoutInMilliseconds > 0
+    //     && (elapsedMilliForTransientIssues + backoffInMilli) > retryTimeoutInMilliseconds) {
+    //   // If the timeout will be reached before the next backoff, just use the remaining
+    //   // time (but cannot be negative) - this is the only place when backoff is not in range
+    //   // min-max.
+    //   backoffInMilli =
+    //       Math.max(
+    //           0,
+    //           Math.min(
+    //               backoffInMilli, retryTimeoutInMilliseconds - elapsedMilliForTransientIssues));
+    //   logger.debug(
+    //       "We are approaching retry timeout {}ms, setting backoff to {}ms",
+    //       retryTimeoutInMilliseconds,
+    //       backoffInMilli);
+    // }
+    return 200l;
   }
 
   static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
