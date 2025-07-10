@@ -61,11 +61,11 @@ public class RestRequest {
   private static final String SF_REQUEST_GUID = "request_guid";
 
   // min backoff in milli before we retry due to transient issues
-  private static final long minBackoffInMilli = 1000;
+  private static final long minBackoffInMilli = 200;
 
   // max backoff in milli before we retry due to transient issues
   // we double the backoff after each retry till we reach the max backoff
-  private static final long maxBackoffInMilli = 16000;
+  private static final long maxBackoffInMilli = 1000;
   
 
   // retry at least once even if timeout limit has been reached
@@ -317,21 +317,21 @@ public class RestRequest {
       int retryCount,
       long retryTimeoutInMilliseconds,
       long elapsedMilliForTransientIssues) {
-    long backoffInMilli=200;
-    // if (isLoginRequest) {
-    //   long jitteredBackoffInMilli =
-    //       decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
-    //   backoffInMilli =
-    //       (long)
-    //           decorrelatedJitterBackoff.chooseRandom(
-    //               jitteredBackoffInMilli + previousBackoffInMilli,
-    //               Math.pow(2, retryCount) + jitteredBackoffInMilli);
-    // } else {
+    long backoffInMilli;
+    if (isLoginRequest) {
+      long jitteredBackoffInMilli =
+          decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
+      backoffInMilli =
+          (long)
+              decorrelatedJitterBackoff.chooseRandom(
+                  jitteredBackoffInMilli + previousBackoffInMilli,
+                  Math.pow(2, retryCount) + jitteredBackoffInMilli);
+    } else {
 
-    //   backoffInMilli = decorrelatedJitterBackoff.nextSleepTime(previousBackoffInMilli);
-    // }
+      backoffInMilli = decorrelatedJitterBackoff.nextSleepTime(previousBackoffInMilli);
+    }
 
-    // backoffInMilli = Math.min(maxBackoffInMilli, Math.max(previousBackoffInMilli, backoffInMilli));
+    backoffInMilli = Math.min(maxBackoffInMilli, Math.max(previousBackoffInMilli, backoffInMilli));
 
     if (retryTimeoutInMilliseconds > 0
         && (elapsedMilliForTransientIssues + backoffInMilli) > retryTimeoutInMilliseconds) {
