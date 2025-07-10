@@ -351,17 +351,38 @@ public class RestRequest {
     return backoffInMilli;
   }
 
+  // static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
+  //   return (response != null)
+  //       && (response.getStatusLine().getStatusCode() < 500
+  //           || // service unavailable
+  //           response.getStatusLine().getStatusCode() >= 600)
+  //       && // gateway timeout
+  //       response.getStatusLine().getStatusCode() != 408
+  //       && // retry
+  //       response.getStatusLine().getStatusCode() != 429
+  //       && // request timeout
+  //       (!retryHTTP403 || response.getStatusLine().getStatusCode() != 403);
+  // }
+
   static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
-    return (response != null)
-        && (response.getStatusLine().getStatusCode() < 500
-            || // service unavailable
-            response.getStatusLine().getStatusCode() >= 600)
-        && // gateway timeout
-        response.getStatusLine().getStatusCode() != 408
-        && // retry
-        response.getStatusLine().getStatusCode() != 429
-        && // request timeout
-        (!retryHTTP403 || response.getStatusLine().getStatusCode() != 403);
+    if (response == null) {
+      return true;                // null response sonothing to retry against
+    }
+  
+  
+    // think we always need to retry these
+    if (response.getStatusLine().getStatusCode() == 408) {            // Request-Timeout – TCP may still be valid
+      return false;
+    }
+    if (!retryHTTP403 && response.getStatusLine().getStatusCode() == 403) {
+      return false;               // specificaly asked to retry 403s
+    }
+  
+    // --- everything else: fail fast dont retry
+    //  • 429  Too-Many-Requests
+    //  • 5xx  Server side overload / unavailability (incl. 503)
+    //  • any 1xx-4xx we didn’t special-case above
+    return true;
   }
 
   private static boolean isCertificateRevoked(Exception ex) {
