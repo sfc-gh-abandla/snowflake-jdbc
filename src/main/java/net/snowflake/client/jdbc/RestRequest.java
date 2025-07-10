@@ -366,12 +366,12 @@ public class RestRequest {
 
   static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
     if (response == null) {
-      return true;                // null response sonothing to retry against
+      return false;                // null response, maybe network error or no http response?
     }
   
   
     // think we always need to retry these
-    if (response.getStatusLine().getStatusCode() == 408) {            // Request-Timeout – TCP may still be valid
+    if (response.getStatusLine().getStatusCode() == 408 || response.getStatusLine().getStatusCode() == 429 ) {            // Request-Timeout – TCP may still be valid
       return false;
     }
     if (!retryHTTP403 && response.getStatusLine().getStatusCode() == 403) {
@@ -382,7 +382,7 @@ public class RestRequest {
     //  • 429  Too-Many-Requests
     //  • 5xx  Server side overload / unavailability (incl. 503)
     //  • any 1xx-4xx we didn’t special-case above
-    return true;
+    return response.getStatusLine().getStatusCode()<500;
   }
 
   private static boolean isCertificateRevoked(Exception ex) {
