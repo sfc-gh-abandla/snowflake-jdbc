@@ -317,7 +317,7 @@ public class RestRequest {
       int retryCount,
       long retryTimeoutInMilliseconds,
       long elapsedMilliForTransientIssues) {
-    // long backoffInMilli;
+    long backoffInMilli=200;
     // if (isLoginRequest) {
     //   long jitteredBackoffInMilli =
     //       decorrelatedJitterBackoff.getJitterForLogin(previousBackoffInMilli);
@@ -333,22 +333,22 @@ public class RestRequest {
 
     // backoffInMilli = Math.min(maxBackoffInMilli, Math.max(previousBackoffInMilli, backoffInMilli));
 
-    // if (retryTimeoutInMilliseconds > 0
-    //     && (elapsedMilliForTransientIssues + backoffInMilli) > retryTimeoutInMilliseconds) {
-    //   // If the timeout will be reached before the next backoff, just use the remaining
-    //   // time (but cannot be negative) - this is the only place when backoff is not in range
-    //   // min-max.
-    //   backoffInMilli =
-    //       Math.max(
-    //           0,
-    //           Math.min(
-    //               backoffInMilli, retryTimeoutInMilliseconds - elapsedMilliForTransientIssues));
-    //   logger.debug(
-    //       "We are approaching retry timeout {}ms, setting backoff to {}ms",
-    //       retryTimeoutInMilliseconds,
-    //       backoffInMilli);
-    // }
-    return 200l;
+    if (retryTimeoutInMilliseconds > 0
+        && (elapsedMilliForTransientIssues + backoffInMilli) > retryTimeoutInMilliseconds) {
+      // If the timeout will be reached before the next backoff, just use the remaining
+      // time (but cannot be negative) - this is the only place when backoff is not in range
+      // min-max.
+      backoffInMilli =
+          Math.max(
+              0,
+              Math.min(
+                  backoffInMilli, retryTimeoutInMilliseconds - elapsedMilliForTransientIssues));
+      logger.debug(
+          "We are approaching retry timeout {}ms, setting backoff to {}ms",
+          retryTimeoutInMilliseconds,
+          backoffInMilli);
+    }
+    return backoffInMilli;
   }
 
   static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
