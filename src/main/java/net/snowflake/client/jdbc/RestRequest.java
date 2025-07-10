@@ -371,7 +371,7 @@ public class RestRequest {
   
   
     // think we always need to retry these
-    if (response.getStatusLine().getStatusCode() == 408 || response.getStatusLine().getStatusCode() == 429 ) {            // Request-Timeout – TCP may still be valid
+    if (response.getStatusLine().getStatusCode() == 408 ) {   
       return false;
     }
     if (!retryHTTP403 && response.getStatusLine().getStatusCode() == 403) {
@@ -382,7 +382,13 @@ public class RestRequest {
     //  • 429  Too-Many-Requests
     //  • 5xx  Server side overload / unavailability (incl. 503)
     //  • any 1xx-4xx we didn’t special-case above
-    return response.getStatusLine().getStatusCode()<500;
+    if (response.getStatusLine().getStatusCode() == 429) {                    // Too-Many-Requests
+      return true;
+    }
+    if (response.getStatusLine().getStatusCode() >= 500) {                    // Every 5xx
+        return true;
+    }
+    return true;
   }
 
   private static boolean isCertificateRevoked(Exception ex) {
