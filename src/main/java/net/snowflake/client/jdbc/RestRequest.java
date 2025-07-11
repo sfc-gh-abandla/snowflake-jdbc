@@ -369,7 +369,13 @@ public class RestRequest {
       return false;                // null response, maybe network error or no http response?
     }
   
-  
+    if (response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
+      return true;  // Don't retry successful responses
+    }
+    // fail fast on 429 and 5xx
+    if (response.getStatusLine().getStatusCode() == 429 || response.getStatusLine().getStatusCode() >= 500) {
+      return true;  // Don't retry throttling or server errors
+    }
     // think we always need to retry these
     if (response.getStatusLine().getStatusCode() == 408 ) {   
       return false;
@@ -382,12 +388,10 @@ public class RestRequest {
     //  • 429  Too-Many-Requests
     //  • 5xx  Server side overload / unavailability (incl. 503)
     //  • any 1xx-4xx we didn’t special-case above
-    if (response.getStatusLine().getStatusCode() == 429) {                    // Too-Many-Requests
-      return true;
-    }
-    if (response.getStatusLine().getStatusCode() >= 500) {                    // Every 5xx
-        return true;
-    }
+    
+    // if (response.getStatusLine().getStatusCode() >= 500) {                    // Every 5xx
+    //     return false;
+    // }
     return true;
   }
 
