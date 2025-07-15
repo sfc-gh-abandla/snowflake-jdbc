@@ -364,34 +364,61 @@ public class RestRequest {
   //       (!retryHTTP403 || response.getStatusLine().getStatusCode() != 403);
   // }
 
+  // static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
+  //   if (response == null) {
+  //     return false;                // null response, maybe network error or no http response?
+  //   }
+  
+  //   if (response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
+  //     return true;  // Don't retry successful responses
+  //   }
+  //   // fail fast on 429 and 5xx
+  //   if (response.getStatusLine().getStatusCode() == 429 || response.getStatusLine().getStatusCode() >= 500) {
+  //     return true;  // Don't retry throttling or server errors
+  //   }
+
+  //   if (response.getStatusLine().getStatusCode() == 408 ) {   
+  //     return false;
+  //   }
+  //   if (!retryHTTP403 && response.getStatusLine().getStatusCode() == 403) {
+  //     return false;               // specificaly asked to retry 403s
+  //   }
+  
+  //   // --- everything else: fail fast dont retry
+  //   //  • 429  Too-Many-Requests
+  //   //  • 5xx  Server side overload / unavailability (incl. 503)
+  //   //  • any 1xx-4xx we didn’t special-case above
+  //   //  408 is Getway Timeout
+    
+  //   // if (response.getStatusLine().getStatusCode() >= 500) {                    // Every 5xx
+  //   //     return false;
+  //   // }
+  //   return true;
+  // }
+
   static boolean isNonRetryableHTTPCode(CloseableHttpResponse response, boolean retryHTTP403) {
     if (response == null) {
-      return false;                // null response, maybe network error or no http response?
+      return false;  // Still retry on null responses (network issues)
     }
-  
-    if (response.getStatusLine().getStatusCode() >= 200 && response.getStatusLine().getStatusCode() < 300) {
-      return true;  // Don't retry successful responses
+    
+    int statusCode = response.getStatusLine().getStatusCode();
+    
+    // For your experiment: FAIL FAST on 429 and 5xx (opposite of original)
+    if (statusCode == 429 || (statusCode >= 500 && statusCode < 600)) {
+      return true;  // Don't retry - fail immediately
     }
-    // fail fast on 429 and 5xx
-    if (response.getStatusLine().getStatusCode() == 429 || response.getStatusLine().getStatusCode() >= 500) {
-      return true;  // Don't retry throttling or server errors
-    }
-    // think we always need to retry these
-    if (response.getStatusLine().getStatusCode() == 408 ) {   
+    
+    // Still retry on 408 (Request Timeout)
+    if (statusCode == 408) {
       return false;
     }
-    if (!retryHTTP403 && response.getStatusLine().getStatusCode() == 403) {
-      return false;               // specificaly asked to retry 403s
-    }
-  
-    // --- everything else: fail fast dont retry
-    //  • 429  Too-Many-Requests
-    //  • 5xx  Server side overload / unavailability (incl. 503)
-    //  • any 1xx-4xx we didn’t special-case above
     
-    // if (response.getStatusLine().getStatusCode() >= 500) {                    // Every 5xx
-    //     return false;
-    // }
+    // Still honor the 403 retry flag
+    if (statusCode == 403 && retryHTTP403) {
+      return false;
+    }
+    
+    // Everything else is non-retryable (1xx, 2xx, 3xx, 4xx except above) like a 200 ok code shouldnt be retried
     return true;
   }
 
